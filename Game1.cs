@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using Pong.Modeller;
 using Pong.Sprites;
 using System;
+using System.IO;
 using System.Collections.Generic;
 
 namespace Pong
@@ -13,15 +14,26 @@ namespace Pong
     /// </summary>
     public class Game1 : Game
     {
+        // Byter mellan main menu och spelskärmen
+        public enum GameState
+        {
+            MainMenu, 
+            Play
+        }
+        GameState CurrentState = GameState.MainMenu;
+
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
         public static int screenBredd;
         public static int screenHöjd;
+
         public static Random rand;
 
         private Poäng poäng;
         private List<Sprite> sprites;
+
+        private Texture2D playButton;
 
         public Game1()
         {
@@ -37,6 +49,7 @@ namespace Pong
         /// </summary>
         protected override void Initialize()
         {
+            // Bredden och höjden på skärmen
             screenBredd = graphics.PreferredBackBufferWidth;
             screenHöjd = graphics.PreferredBackBufferHeight;
             rand = new Random();
@@ -52,8 +65,11 @@ namespace Pong
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+
             var playerTexture = Content.Load<Texture2D>("Bat");
             var bollTexture = Content.Load<Texture2D>("Ball");
+
+            playButton = Content.Load<Texture2D>("play");
 
             sprites = new List<Sprite>()
             {
@@ -100,12 +116,22 @@ namespace Pong
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
 
-            foreach(var sprite in sprites)
+            switch (CurrentState)
             {
-                sprite.Update(gameTime, sprites);
+                case GameState.MainMenu:
+                    if (Keyboard.GetState().IsKeyDown(Keys.Enter)) // Enter för att starta spelet
+                        CurrentState = GameState.Play;
+                    break;
+
+                case GameState.Play:
+                    foreach (var sprite in sprites)
+                    {
+                        sprite.Update(gameTime, sprites);
+                    }
+                    if (Keyboard.GetState().IsKeyDown(Keys.Escape)) // Escape för att komma till main menu
+                        CurrentState = GameState.MainMenu;
+                    break;
             }
 
             base.Update(gameTime);
@@ -117,14 +143,26 @@ namespace Pong
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
 
             spriteBatch.Begin();
 
-            foreach (var sprite in sprites)
-                sprite.Draw(spriteBatch);
-
+            switch (CurrentState)
+            {
+                // Main menu skärmen
+                case GameState.MainMenu:
+                    GraphicsDevice.Clear(Color.White);
+                    spriteBatch.Draw(playButton, new Vector2((screenBredd / 2) - (playButton.Width / 2), (screenHöjd / 2) - (playButton.Height / 2)), Color.White);
+                    break;
+                
+                // Spel skärmen
+                case GameState.Play:
+                    GraphicsDevice.Clear(Color.Black);
+                    foreach (var sprite in sprites)
+                        sprite.Draw(spriteBatch);
+                    break;
+            }
             spriteBatch.End();
+
             base.Draw(gameTime);
         }
     }
