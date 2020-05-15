@@ -14,7 +14,7 @@ namespace Pong.Sprites
         private float Timer = 0f; // Ökar farten med tiden
         private Vector2? startPos = null;
         private float? startSpeed;
-        private bool Spelar;
+        public bool Spelar;
 
         public Poäng Poäng;
         public int fartÖkning = 10; // Hur ofta farten ökar
@@ -27,14 +27,19 @@ namespace Pong.Sprites
 
         public override void Update(GameTime gameTime, List<Sprite> sprites)
         {
-            if(startPos == null)
+            // Restartar spelet om du trycker Escape
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+                Restart();
+
+            if (startPos == null)
             {
                 startPos = Pos;
                 startSpeed = speed;
 
-                Restart();
+                Reset();
             }
 
+            // Starta bollen genom att trycka Space
             if (Keyboard.GetState().IsKeyDown(Keys.Space))
                 Spelar = true;
 
@@ -43,6 +48,7 @@ namespace Pong.Sprites
 
             Timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            // Om timern är högre än fartökningsvariabeln ökar farten med ett f
             if(Timer > fartÖkning)
             {
                 speed++;
@@ -64,24 +70,26 @@ namespace Pong.Sprites
                     this.Fart.Y = -this.Fart.Y;
             }
 
-            if (Pos.Y <= 0 || Pos.Y + Texture.Height >= Game1.screenHöjd)
+            if (Pos.Y <= 0 || Pos.Y + Texture.Height >= Game1.screenHöjd) // Studsar bollen om den träffar kanterna i y-led
                 Fart.Y = -Fart.Y;
 
-            if(Pos.X + Texture.Width <= 0)
+            if(Pos.X + Texture.Width <= 0) // Resettar bollen om player 2 gör mål
             {
-                Restart();
+                Poäng.Poäng2++;
+                Reset();
             }
 
-            if (Pos.X + Texture.Width >= Game1.screenBredd || Keyboard.GetState().IsKeyDown(Keys.R))
+            if (Pos.X + Texture.Width >= Game1.screenBredd) // Resettar bollen om player 1 gör mål
             {
-                Restart();
+                Poäng.Poäng1++;
+                Reset();
             }
 
             Pos += Fart * speed;
         }
 
-        // Restart
-        public void Restart()
+        // Reset
+        public void Reset()
         {
             var riktning = Game1.rand.Next(0, 4); // Den random riktning bollen börjar med
 
@@ -101,11 +109,19 @@ namespace Pong.Sprites
                     break;
             }
 
-            // Allt resettas
+            // Allt resettas förutom score
             Pos = (Vector2)startPos;
             speed = (float)startSpeed;
             Timer = 0;
             Spelar = false;
+        }
+
+        // Restartar spelet
+        public void Restart()
+        {
+            Reset();
+            Poäng.Poäng1 = 0;
+            Poäng.Poäng2 = 0;   
         }
     }
 }

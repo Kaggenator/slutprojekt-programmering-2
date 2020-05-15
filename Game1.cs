@@ -14,11 +14,12 @@ namespace Pong
     /// </summary>
     public class Game1 : Game
     {
-        // Byter mellan main menu och spelskärmen
+        // Olika gamestates
         public enum GameState
         {
             MainMenu, 
-            Play
+            Play,
+            Pause
         }
         GameState CurrentState = GameState.MainMenu;
 
@@ -33,7 +34,8 @@ namespace Pong
         private Poäng poäng;
         private List<Sprite> sprites;
 
-        private Texture2D playButton;
+        private Texture2D playGameButton;
+        private Texture2D pauseButton;
 
         public Game1()
         {
@@ -69,7 +71,10 @@ namespace Pong
             var playerTexture = Content.Load<Texture2D>("Bat");
             var bollTexture = Content.Load<Texture2D>("Ball");
 
-            playButton = Content.Load<Texture2D>("play");
+            poäng = new Poäng(Content.Load<SpriteFont>("font"));
+
+            playGameButton = Content.Load<Texture2D>("play");
+            pauseButton = Content.Load<Texture2D>("pause");
 
             sprites = new List<Sprite>()
             {
@@ -94,6 +99,7 @@ namespace Pong
                 new Boll(bollTexture)
                 {
                     Pos = new Vector2((screenBredd / 2) - (bollTexture.Width / 2), (screenHöjd / 2) - (bollTexture.Height / 2)),
+                    Poäng = poäng,
                 },
             };
 
@@ -119,6 +125,7 @@ namespace Pong
 
             switch (CurrentState)
             {
+                // Byter mellan gamestates
                 case GameState.MainMenu:
                     if (Keyboard.GetState().IsKeyDown(Keys.Enter)) // Enter för att starta spelet
                         CurrentState = GameState.Play;
@@ -129,6 +136,15 @@ namespace Pong
                     {
                         sprite.Update(gameTime, sprites);
                     }
+                    if (Keyboard.GetState().IsKeyDown(Keys.P)) // P för att pausa
+                        CurrentState = GameState.Pause;
+                    if (Keyboard.GetState().IsKeyDown(Keys.Escape)) // Escape för att komma till main menu
+                        CurrentState = GameState.MainMenu;
+                    break;
+
+                case GameState.Pause:
+                    if (Keyboard.GetState().IsKeyDown(Keys.Space)) // Space för att återuppta
+                        CurrentState = GameState.Play;
                     if (Keyboard.GetState().IsKeyDown(Keys.Escape)) // Escape för att komma till main menu
                         CurrentState = GameState.MainMenu;
                     break;
@@ -150,8 +166,8 @@ namespace Pong
             {
                 // Main menu skärmen
                 case GameState.MainMenu:
-                    GraphicsDevice.Clear(Color.White);
-                    spriteBatch.Draw(playButton, new Vector2((screenBredd / 2) - (playButton.Width / 2), (screenHöjd / 2) - (playButton.Height / 2)), Color.White);
+                    GraphicsDevice.Clear(Color.Black);
+                    spriteBatch.Draw(playGameButton, new Vector2((screenBredd / 2) - (playGameButton.Width / 2), (screenHöjd / 2) - (playGameButton.Height / 2)), Color.White);
                     break;
                 
                 // Spel skärmen
@@ -159,8 +175,16 @@ namespace Pong
                     GraphicsDevice.Clear(Color.Black);
                     foreach (var sprite in sprites)
                         sprite.Draw(spriteBatch);
+                    poäng.Draw(spriteBatch);
+                    break;
+
+                // Pause skärmen
+                case GameState.Pause:
+                    GraphicsDevice.Clear(Color.Black);
+                    spriteBatch.Draw(pauseButton, new Vector2((screenBredd / 2) - (pauseButton.Width / 2), (screenHöjd / 2) - (pauseButton.Height / 2)), Color.White);
                     break;
             }
+
             spriteBatch.End();
 
             base.Draw(gameTime);
