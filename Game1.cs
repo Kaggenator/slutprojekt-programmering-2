@@ -54,7 +54,20 @@ namespace Pong
             // Bredden och höjden på skärmen
             screenBredd = graphics.PreferredBackBufferWidth;
             screenHöjd = graphics.PreferredBackBufferHeight;
+
             rand = new Random();
+
+            // Tutorial
+            StreamWriter sw = new StreamWriter("tutorial.txt");
+            sw.WriteLine("TUTORIAL:");
+            sw.WriteLine("Press ENTER to start game");
+            sw.WriteLine("Press SPACE to start ball");
+            sw.WriteLine("Player1 W-up S-down");
+            sw.WriteLine("Player2 Up-arrow-up Down-arrow-down");
+            sw.WriteLine("Press P to pause");
+            sw.WriteLine("Press SPACE to resume");
+            sw.WriteLine("Press ESCAPE to leave game");
+            sw.Close();
 
             base.Initialize();
         }
@@ -73,7 +86,7 @@ namespace Pong
 
             poäng = new Poäng(Content.Load<SpriteFont>("font"));
 
-            playGameButton = Content.Load<Texture2D>("play");
+            playGameButton = Content.Load<Texture2D>("play2");
             pauseButton = Content.Load<Texture2D>("pause");
 
             sprites = new List<Sprite>()
